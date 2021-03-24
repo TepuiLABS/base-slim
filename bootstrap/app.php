@@ -7,6 +7,8 @@ use App\Views\EnvExtension;
 use Slim\Factory\AppFactory;
 use Slim\Views\TwigMiddleware;
 use Twig\Extension\DebugExtension;
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -31,6 +33,36 @@ $container->set('view', function() use ($app) {
 
     return $twig;
 });
+
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+	return $response;
+});
+
+$app->add(function (Request $request, $handler) {
+	$response = $handler->handle($request);
+
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader(
+            'Access-Control-Allow-Headers',
+            'X-Requested-With, Content-Type, Accept, Origin, Authorization'
+        )
+        ->withHeader(
+            'Access-Control-Allow-Methods',
+            'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+        );
+});
+
+$app->map([
+	'GET',
+	'POST',
+	'PUT',
+	'DELETE',
+	'PATCH'
+], '/{routes:.+}', function (Request $request) {
+        throw new Slim\Exception\HttpNotFoundException($request);
+    }
+);
 
 $app->add(TwigMiddleware::createFromContainer($app));
 $app->add(new \Middlewares\TrailingSlash(false));
