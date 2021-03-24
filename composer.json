@@ -2,7 +2,7 @@
 	"name": "tepuilabs/base-slim",
 	"type": "project",
 	"license": "MIT",
-	"description": "",
+	"description": "Starter structure for the Slim PHP framework",
 	"authors": [
 		{
 			"name": "angel cruz",
