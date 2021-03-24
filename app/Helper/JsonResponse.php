@@ -8,7 +8,7 @@ final class JsonResponse
 {
     public static function withJson(Response $response, $data, $status = 200 )
 	{
-        $response->getBody()->write($data);
+        $response->getBody()->write(json_encode($data));
 
         return $response
             ->withHeader('Content-Type', 'application/json')

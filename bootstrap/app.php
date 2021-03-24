@@ -3,12 +3,12 @@
 use DI\Container;
 use Dotenv\Dotenv;
 use Slim\Views\Twig;
+use App\Exceptions\Handler;
 use App\Views\EnvExtension;
 use Slim\Factory\AppFactory;
 use Slim\Views\TwigMiddleware;
 use Twig\Extension\DebugExtension;
 use Psr\Http\Message\RequestInterface as Request;
-use Psr\Http\Message\ResponseInterface as Response;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -34,9 +34,7 @@ $container->set('view', function() use ($app) {
     return $twig;
 });
 
-$app->options('/{routes:.+}', function (Request $request, Response $response) {
-	return $response;
-});
+$app->addRoutingMiddleware();
 
 $app->add(function (Request $request, $handler) {
 	$response = $handler->handle($request);
@@ -53,15 +51,13 @@ $app->add(function (Request $request, $handler) {
         );
 });
 
-$app->map([
-	'GET',
-	'POST',
-	'PUT',
-	'DELETE',
-	'PATCH'
-], '/{routes:.+}', function (Request $request) {
-        throw new Slim\Exception\HttpNotFoundException($request);
-    }
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+
+$errorMiddleware->setDefaultErrorHandler(
+	new Handler(
+		$app->getResponseFactory(),
+		$container->get('view')
+	)
 );
 
 $app->add(TwigMiddleware::createFromContainer($app));
