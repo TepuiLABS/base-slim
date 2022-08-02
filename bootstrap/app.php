@@ -3,10 +3,12 @@
 use DI\Container;
 use Dotenv\Dotenv;
 use Slim\Views\Twig;
+use App\Exceptions\Handler;
 use App\Views\EnvExtension;
 use Slim\Factory\AppFactory;
 use Slim\Views\TwigMiddleware;
 use Twig\Extension\DebugExtension;
+use Psr\Http\Message\RequestInterface as Request;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -31,6 +33,32 @@ $container->set('view', function() use ($app) {
 
     return $twig;
 });
+
+$app->addRoutingMiddleware();
+
+$app->add(function (Request $request, $handler) {
+	$response = $handler->handle($request);
+
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader(
+            'Access-Control-Allow-Headers',
+            'X-Requested-With, Content-Type, Accept, Origin, Authorization'
+        )
+        ->withHeader(
+            'Access-Control-Allow-Methods',
+            'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+        );
+});
+
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+
+$errorMiddleware->setDefaultErrorHandler(
+	new Handler(
+		$app->getResponseFactory(),
+		$container->get('view')
+	)
+);
 
 $app->add(TwigMiddleware::createFromContainer($app));
 $app->add(new \Middlewares\TrailingSlash(false));
