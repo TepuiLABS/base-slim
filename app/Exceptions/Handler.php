@@ -2,11 +2,16 @@
 namespace App\Exceptions;
 
 use App\Helper\JsonResponse;
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Views\Twig;
 use Throwable;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class Handler
 {
@@ -30,9 +35,13 @@ class Handler
 	/**
 	 * Undocumented function
 	 *
-	 * @param ServerRequestInterface $request
-	 * @param Throwable $exception
-	 * @return void
+	 * @param  ServerRequestInterface  $request
+	 * @param  Throwable  $exception  ]
+	 * @return MessageInterface|ResponseInterface
+	 * @throws Throwable
+	 * @throws LoaderError
+	 * @throws RuntimeError
+	 * @throws SyntaxError
 	 */
 	public function __invoke(ServerRequestInterface $request, Throwable $exception)
 	{

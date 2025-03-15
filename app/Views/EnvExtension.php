@@ -2,12 +2,13 @@
 
 namespace App\Views;
 
+use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class EnvExtension extends \Twig\Extension\AbstractExtension
+class EnvExtension extends AbstractExtension
 {
-    public function getFunctions()
-    {
+    public function getFunctions(): array
+	{
         return [
             new TwigFunction('env', [$this, 'env'])
         ];

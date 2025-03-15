@@ -1,7 +1,10 @@
 <?php
 
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Dotenv\Dotenv;
+use Middlewares\TrailingSlash;
 use Slim\Views\Twig;
 use App\Exceptions\Handler;
 use App\Views\EnvExtension;
@@ -53,15 +56,21 @@ $app->add(function (Request $request, $handler) {
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-$errorMiddleware->setDefaultErrorHandler(
-	new Handler(
-		$app->getResponseFactory(),
-		$container->get('view')
-	)
-);
+try {
+	$errorMiddleware->setDefaultErrorHandler(
+		new Handler(
+			$app->getResponseFactory(),
+			$container->get('view')
+		)
+	);
+} catch (DependencyException $e) {
+
+} catch (NotFoundException $e) {
+
+}
 
 $app->add(TwigMiddleware::createFromContainer($app));
-$app->add(new \Middlewares\TrailingSlash(false));
+$app->add(new TrailingSlash(false));
 
 require_once __DIR__ .'/../routes/web.php';
 require_once __DIR__ .'/database.php';
